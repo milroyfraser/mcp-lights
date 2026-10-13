@@ -1,0 +1,5 @@
+{
+  "name": "mcp-lights",
+  "owner": { "name": "Milroy Fraser", "url": "https://github.com/milroyfraser" },
+  "plugins": [{ "name": "mcp-lights", "source": "./", "description": "Live MCP server chips above the prompt that light up while their tools run." }]
+}

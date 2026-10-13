@@ -1,0 +1,9 @@
+{
+  "name": "mcp-lights",
+  "version": "0.2.0",
+  "description": "Band above the prompt listing this session's MCP servers; a server's chip lights up, with a live count of running calls, while its tools run.",
+  "author": { "name": "Milroy Fraser", "url": "https://github.com/milroyfraser" },
+  "repository": "https://github.com/milroyfraser/mcp-lights",
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
