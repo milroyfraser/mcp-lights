@@ -2,8 +2,10 @@
 
 A Claude Code mod that shows the session's MCP servers as chips in a strip above the prompt box. It works in the desktop app's Code tab and in the terminal.
 
+![mcp-lights strip: Slack and Claude Docs lit with live counts of running calls](docs/strip.svg)
+
 ```
-○ cloudflare 4   ● Slack 2/27   ○ Claude Docs 8   ○ visualize 2   ↻  Hide
+○ cloudflare 4   ● Slack 2/27   ● Claude Docs 1/8   ○ visualize 2   ✕ linear   ↻  Hide
 ```
 
 - **Idle** `○ Slack 27`: the server is connected and has 27 tools.
