@@ -1,11 +1,27 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Server } from '../types'
+import type { Server, ThemeName } from '../types'
 
 const servers = atom({ plugin: 'mcp-lights', key: 'servers' } as const, [])
 const active = atom({ plugin: 'mcp-lights', key: 'active' } as const, {})
 const isHidden = atom({ plugin: 'mcp-lights', key: 'isHidden' } as const, false)
+const theme = atom({ plugin: 'mcp-lights', key: 'theme' } as const, 'default')
+
+// Each chip paints its own background, so a theme reads on light and dark alike.
+export const THEMES: Record<ThemeName, { lit: { color: string; backgroundColor: string }; offline: { color: string; backgroundColor?: string } }> = {
+  default: {
+    lit: { color: 'inverseText', backgroundColor: 'success' },
+    offline: { color: 'error' },
+  },
+  naadi: {
+    lit: { color: '#1a1a1a', backgroundColor: '#eb9955' },
+    offline: { color: '#ffffff', backgroundColor: '#8f1f2b' },
+  },
+}
+
+const isTheme = (name: string): name is ThemeName => Object.hasOwn(THEMES, name)
+const THEME_NAMES = Object.keys(THEMES).join(', ')
 
 const STATUS_TOOL = 'mcp__ccd_connectors__session_connectors_status'
 
@@ -56,8 +72,21 @@ const refresh = async ($: EngineInterface) => {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
+    await $.command.register({ name: 'mcp-theme', description: 'Change the colors of the MCP server chips.', argumentHint: THEME_NAMES })
+    const saved = await $.store.get('theme')
+    if (typeof saved === 'string' && isTheme(saved)) await update($, theme, () => saved)
     $.clock.after(1500, () => void refresh($).catch(() => {}))
     return started
+  })
+
+  on('command.run', { command: 'mcp-theme' }, async ($, e) => {
+    const name = (e.args ?? '').trim().toLowerCase()
+    if (!name) return { text: `The chips use the ${await read($, theme)} theme. Themes: ${THEME_NAMES}.` }
+    if (!isTheme(name)) return { text: `There's no theme called "${name}". Themes: ${THEME_NAMES}.` }
+
+    await update($, theme, () => name)
+    await $.store.set('theme', name)
+    return { text: `The chips now use the ${name} theme.` }
   })
 
   on('tool.call', async ($, e, next) => {
@@ -81,6 +110,7 @@ export const register: Register = on => {
 
     const list = await read($, servers)
     const lit = await read($, active)
+    const colors = THEMES[await read($, theme)] ?? THEMES.default
     const extras = Object.keys(lit).filter(k => !list.some(s => s.key === k))
     if (list.length === 0 && extras.length === 0) return next(e)
 
@@ -93,7 +123,7 @@ export const register: Register = on => {
       const detail = isLit ? ` ${running}${tools ? `/${tools}` : ''}` : tools ? ` ${tools}` : ''
       const dot = isLit ? '●' : status === 'connected' ? '○' : '✕'
       return (
-        <Text key={key} color={isLit ? 'inverseText' : status === 'connected' ? undefined : 'error'} backgroundColor={isLit ? 'success' : undefined} bold={isLit} dimColor={!isLit && status === 'connected'}>
+        <Text key={key} {...(isLit ? colors.lit : status === 'connected' ? {} : colors.offline)} bold={isLit} dimColor={!isLit && status === 'connected'}>
           {` ${dot} ${name}${detail} `}
         </Text>
       )

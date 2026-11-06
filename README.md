@@ -15,6 +15,17 @@ A Claude Code mod that shows the session's MCP servers as chips in a strip above
 
 The app's internal servers appear only while one of their tools is running.
 
+## Themes
+
+Run `/mcp-theme` to see the current theme, or name one to switch. Your choice is kept across sessions.
+
+```
+/mcp-theme naadi
+```
+
+- `default`: running chips use your Claude Code theme's success color.
+- `naadi`: running chips are amber, and chips that aren't connected are deep red. The colors come from the NAADI design system and read on light and dark themes.
+
 ## Install
 
 Type this at the prompt of a Claude Code session running in a terminal:
